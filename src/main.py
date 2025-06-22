@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import RedirectResponse
-# from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from contextlib import asynccontextmanager
@@ -39,3 +38,8 @@ def create_app() -> FastAPI:
 
     return _app
 
+app = create_app()
+
+@app.get("/ping", include_in_schema=False)
+async def ping_pong():
+    return {"status": "pong"}
