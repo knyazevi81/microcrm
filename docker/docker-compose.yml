@@ -1,0 +1,41 @@
+services:
+  main-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: microcrm
+    ports:
+      - "${API_PORT}:8000"
+    command: "alembic upgrade head && uvicorn --factory src.main:create_app --reload --host 0.0.0.0"
+    env_file:
+      - "../.env"
+    volumes:
+      - "..:/app/"
+    depends_on:
+      - postgres
+    
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    links:
+      - postgres:db
+    depends_on:
+      - postgres
+    networks:
+      - micronet
+
+  postgres:
+    image: postgres:latest
+    container_name: psgr
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    networks:
+      - micronet
+    
+networks:
+  micronet:
+    driver: bridge
