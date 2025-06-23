@@ -60,8 +60,11 @@ requires-python = ">=3.10"
 dependencies = [
     "alembic>=1.16.2",
     "asyncpg>=0.30.0",
+    "bcrypt>=4.3.0",
     "fastapi>=0.115.13",
+    "passlib>=1.7.4",
     "pydantic-settings>=2.10.0",
+    "python-jose>=3.5.0",
     "telebot>=0.0.5",
     "uvicorn>=0.34.3",
     "wsproto>=1.2.0",
