@@ -23,18 +23,14 @@ def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=30)
     to_encode.update({"exp": expire})
-    encode_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALG
-    )
+    encode_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALG)
     return encode_jwt
 
 
 async def authenticate_user(login: str, password: str) -> User | None:
-    user = await UserService.find_one_or_none(login=login)
+    user = await UserService.find_one_or_none(username=login)
     if not user:
         return None
-    if verify_password(password, user.hashed_password):
+    if verify_password(password, user.password_hash):
         return user
     return None

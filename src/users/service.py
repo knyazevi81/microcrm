@@ -3,7 +3,8 @@ from src.dao.base import BaseService
 
 
 class UserService(BaseService):
-    model=User
+    model = User
+
 
 class UserRoleService(BaseService):
-    model=UserRole
+    model = UserRole
