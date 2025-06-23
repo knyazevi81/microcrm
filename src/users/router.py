@@ -74,3 +74,9 @@ async def refresh_user_password(
     password_hash=hashed_password
     )
     return {"status": "Password successfully changed!"}
+
+
+@router.post("/logout")
+async def logout_user(response: Response):
+    response.delete_cookie("crm_access_token")
+    return {"status": "User succsessfully logouted"}
