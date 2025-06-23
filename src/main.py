@@ -5,11 +5,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from contextlib import asynccontextmanager
 
+from src.users.router import router as users_router
+from src.users.service import UserRoleService, UserService
+from src.users.auth import get_password_hash
+from src.config import settings
+
 
 class NotFoundRedirectMiddleware(BaseHTTPMiddleware):
     """
-    Middleware for redirect when trying to enter a non-existent endopoint
-    simply redirects to the authentication page
+    Middleware для редиректа в случае ошибки 404
     """
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
@@ -20,14 +24,39 @@ class NotFoundRedirectMiddleware(BaseHTTPMiddleware):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Асинхронный контекст-менеджер жизненного цикла приложения FastAPI.
+    Используется для выполнения действий при старте и завершении работы приложения.
+
+    При запуске приложения автоматически добавляет базовые роли пользователей
+    ("manager", "admin", "root") в базу данных через UserRoleService.
+    """
+    # Create users roles
+    for user_role in ["manager", "admin", "root"]: # Base roles
+        await UserRoleService.add(
+            role=user_role
+        )
+        print(f"User role {user_role} was created")
+    # Create root user
+    hashed_password = get_password_hash(settings.ROOT_PASSWORD)
+    await UserService.add(
+        username=settings.ROOT_USERNAME,
+        email=settings.ROOT_EMAIL,
+        password_hash=hashed_password,
+        full_name="ROOT",
+        role=3
+    )
     yield
 
 
 def create_app() -> FastAPI:
     _app = FastAPI(
         title="MicroCRM",
-        description="Welcome to MIcroCRM API documentation!",
+        description="Добро пожаловать в документацию MicroCRM API",
+        lifespan=lifespan
     )
+
+    _app.include_router(users_router)
 
     #_app.mount(
     #    "/static",
