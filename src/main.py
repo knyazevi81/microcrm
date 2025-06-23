@@ -85,27 +85,40 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("Redis cache initialized")
     except Exception as e:
         logger.error(f"Failed to initialize Redis cache: {e}")
-    yield
-    # Здесь можно добавить graceful shutdown для Redis, если потребуется
+    try:
+        yield
+    finally:
+        if redis_client is not None:
+            try:
+                await redis_client.close()
+                logger.info("Redis client closed gracefully")
+            except Exception as e:
+                logger.error(f"Error closing Redis client: {e}")
+        if redis_pool is not None:
+            try:
+                await redis_pool.disconnect()
+                logger.info("Redis pool disconnected gracefully")
+            except Exception as e:
+                logger.error(f"Error disconnecting Redis pool: {e}")
 
 
 def create_app() -> FastAPI:
     """
     Создаёт и настраивает экземпляр FastAPI приложения.
     """
-    app = FastAPI(
+    _app = FastAPI(
         title="MicroCRM",
         description="Добро пожаловать в документацию MicroCRM API",
         lifespan=lifespan,
     )
 
-    app.include_router(users_router)
-    app.include_router(frontend_router)
+    _app.include_router(users_router)
+    _app.include_router(frontend_router)
 
-    app.mount("/static", StaticFiles(directory="src/frontend/public/static"), "static")
-    app.add_middleware(NotFoundRedirectMiddleware)
+    _app.mount("/static", StaticFiles(directory="src/frontend/public/static"), "static")
+    # app.add_middleware(NotFoundRedirectMiddleware)
 
-    return app
+    return _app
 
 
 app = create_app()
