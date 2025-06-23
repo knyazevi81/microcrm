@@ -6,13 +6,18 @@ services:
     container_name: microcrm
     ports:
       - "${API_PORT}:8000"
-    command: "alembic upgrade head && uvicorn --factory src.main:create_app --reload --host 0.0.0.0"
+    command: >
+      sh -c "until nc -z postgres 5432; do sleep 1; done;
+             alembic upgrade head &&
+             uvicorn --factory src.main:create_app --reload --host 0.0.0.0"
     env_file:
       - "../.env"
     volumes:
       - "..:/app/"
     depends_on:
       - postgres
+    networks:
+      - micronet
     
   adminer:
     image: adminer
