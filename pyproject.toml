@@ -4,25 +4,7 @@ target_version = ['py311']
 include = '\.pyi?$'
 
 [tool.ruff]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    # "I",  # isort
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # complexity
-]
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F"]
-unfixable = []
-
-# Exclude a variety of commonly ignored directories.
+line-length = 100
 exclude = [
     ".bzr",
     ".direnv",
@@ -45,11 +27,22 @@ exclude = [
     "venv",
 ]
 
-# Same as Black.
-line-length = 100
-
-# Allow unused variables when underscore-prefixed.
+[tool.ruff.lint]
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+fixable = ["A", "B", "C", "D", "E", "F"]
+unfixable = []
+ignore = [
+    "E501",
+    "B008",
+    "C901",
+]
+select = [
+    "E",
+    "W",
+    "F",
+    "C",
+    "B",
+]
 
 [project]
 name = "microcrm"
@@ -61,10 +54,12 @@ dependencies = [
     "alembic>=1.16.2",
     "asyncpg>=0.30.0",
     "bcrypt>=4.3.0",
+    "black>=25.1.0",
     "fastapi>=0.115.13",
     "passlib>=1.7.4",
     "pydantic-settings>=2.10.0",
     "python-jose>=3.5.0",
+    "ruff>=0.12.0",
     "telebot>=0.0.5",
     "uvicorn>=0.34.3",
     "wsproto>=1.2.0",
