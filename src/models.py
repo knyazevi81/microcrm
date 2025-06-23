@@ -6,7 +6,7 @@ from src.database import Base
 class User(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     full_name: Mapped[str] = mapped_column(String,)
