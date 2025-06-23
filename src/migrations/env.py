@@ -10,13 +10,10 @@ from os.path import abspath, dirname
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 # нужно добавить этот костыль
-# для того чтобы env.py понимал где он он понимал где он находится 
+# для того чтобы env.py понимал где он он понимал где он находится
 
 from src.database import Base
-from src.users.models import User
-from src.clients.models import client
-from src.deals.models import Deal, DealStatus, Message
-
+from src.models import User,Client, Deal, DealStatus,Message
 
 
 from src.config import settings
@@ -26,7 +23,7 @@ from src.config import settings
 config = context.config
 
 config.set_main_option(
-    "sqlalchemy.url", 
+    "sqlalchemy.url",
     f"{settings.DATABASE_URL}?async_fallback=True"
 )
 
