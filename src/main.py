@@ -1,10 +1,18 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 
+import redis.asyncio as redis
+from redis.asyncio.connection import ConnectionPool
+
+from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
+from src.frontend.router import router as frontend_router
 from src.users.router import router as users_router
 from src.users.service import UserRoleService, UserService
 from src.users.auth import get_password_hash
@@ -24,7 +32,7 @@ class NotFoundRedirectMiddleware(BaseHTTPMiddleware):
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
     Асинхронный контекст-менеджер жизненного цикла приложения FastAPI.
     Используется для выполнения действий при старте и завершении работы приложения.
@@ -47,6 +55,9 @@ async def lifespan(app: FastAPI):
             full_name="ROOT",
             role=3,
         )
+    redis_pool = ConnectionPool.from_url(settings.redis_url, decode_responses=True)
+    redis_client = redis.Redis(connection_pool=redis_pool)
+    FastAPICache.init(RedisBackend(redis_client), prefix="microcrm-cache")  # type: ignore
     yield
 
 
@@ -58,12 +69,9 @@ def create_app() -> FastAPI:
     )
 
     _app.include_router(users_router)
+    _app.include_router(frontend_router)
 
-    # _app.mount(
-    #    "/static",
-    #    StaticFiles(directory="src/frontend/public/static"),
-    #    "static"
-    # )
+    _app.mount("/static", StaticFiles(directory="src/frontend/public/static"), "static")
     # _app.add_middleware(NotFoundRedirectMiddleware)
 
     return _app
