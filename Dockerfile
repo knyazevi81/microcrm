@@ -7,6 +7,7 @@ WORKDIR /app
 
 RUN apt update -y && \
     apt install -y python3-dev gcc musl-dev
+RUN apt-get update && apt-get install -y netcat
 
 ADD requirements.txt /app
 
