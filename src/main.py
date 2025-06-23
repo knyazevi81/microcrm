@@ -15,10 +15,11 @@ class NotFoundRedirectMiddleware(BaseHTTPMiddleware):
     """
     Middleware для редиректа в случае ошибки 404
     """
+
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
         if response.status_code == 404:
-            return RedirectResponse(url='/login')
+            return RedirectResponse(url="/login")
         return response
 
 
@@ -32,20 +33,20 @@ async def lifespan(app: FastAPI):
     ("manager", "admin", "root") в базу данных через UserRoleService.
     """
     # Create users roles
-    for user_role in ["manager", "admin", "root"]: # Base roles
-        await UserRoleService.add(
-            role=user_role
-        )
+    for user_role in ["manager", "admin", "root"]:  # Base roles
+        await UserRoleService.add(role=user_role)
         print(f"User role {user_role} was created")
     # Create root user
-    hashed_password = get_password_hash(settings.ROOT_PASSWORD)
-    await UserService.add(
-        username=settings.ROOT_USERNAME,
-        email=settings.ROOT_EMAIL,
-        password_hash=hashed_password,
-        full_name="ROOT",
-        role=3
-    )
+    existing_root = await UserService.find_one_or_none(username=settings.ROOT_USERNAME)
+    if not existing_root:
+        hashed_password = get_password_hash(settings.ROOT_PASSWORD)
+        await UserService.add(
+            username=settings.ROOT_USERNAME,
+            email=settings.ROOT_EMAIL,
+            password_hash=hashed_password,
+            full_name="ROOT",
+            role=3,
+        )
     yield
 
 
@@ -53,21 +54,23 @@ def create_app() -> FastAPI:
     _app = FastAPI(
         title="MicroCRM",
         description="Добро пожаловать в документацию MicroCRM API",
-        lifespan=lifespan
+        lifespan=lifespan,
     )
 
     _app.include_router(users_router)
 
-    #_app.mount(
+    # _app.mount(
     #    "/static",
     #    StaticFiles(directory="src/frontend/public/static"),
     #    "static"
-    #)
-    #_app.add_middleware(NotFoundRedirectMiddleware)
+    # )
+    # _app.add_middleware(NotFoundRedirectMiddleware)
 
     return _app
 
+
 app = create_app()
+
 
 @app.get("/ping", include_in_schema=False)
 async def ping_pong():
