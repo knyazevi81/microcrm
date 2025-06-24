@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, update
 from sqlalchemy.orm import DeclarativeMeta
 from typing import TypeVar,Generic, Type
 
@@ -35,5 +35,14 @@ class BaseService(Generic[ModelType]):
     async def add(cls, **data):
         async with async_session_maker() as session:
             query = insert(cls.model).values(**data)
+            await session.execute(query)
+            await session.commit()
+    
+    @classmethod
+    async def update(cls, filter_by: dict, **data):
+        async with async_session_maker() as session:
+            query = update(cls.model).where(
+                *[getattr(cls.model, key) == value for key, value in filter_by.items()]
+            ).values(**data)
             await session.execute(query)
             await session.commit()
