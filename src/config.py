@@ -18,16 +18,13 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""
-    REDIS_USER: str
-    REDIS_USER_PASSWORD: str
 
     @property
     def redis_url(self):
         if self.REDIS_PASSWORD:
-            return f"redis://{self.REDIS_USER}:{self.REDIS_USER_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+            return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/0"
         else:
             return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
-
     @property
     def DATABASE_URL(
         self,
