@@ -37,7 +37,7 @@ class BaseService(Generic[ModelType]):
             query = insert(cls.model).values(**data)
             await session.execute(query)
             await session.commit()
-    
+
     @classmethod
     async def update(cls, filter_by: dict, **data):
         async with async_session_maker() as session:
